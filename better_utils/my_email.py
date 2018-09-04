@@ -5,13 +5,12 @@ Created on Mon Aug 13 16:53:12 2018
 @author: ying.zhang01
 """
 
-import os
 import re
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-from utils.log import Log
+import Log
 
 
 class Email:
@@ -66,17 +65,8 @@ class Email:
 
         # 构造邮件正文html内容，同时作为附件发送
         if self.message:
-            file = self._find_new_file(self.message)  # 查找目录下最新的测试报告
-            with open(file, 'rb') as f:
-                html = f.read()
-                text_html = MIMEText(html, 'html', 'utf-8')
-                self.msg.attach(text_html)
-
-                atta_html = MIMEText(html, 'base64', 'utf-8')
-                atta_html["Content-Type"] = 'application/octet-stream'
-                # 附件重命名
-                atta_html["Content-Disposition"] = 'attachment; filename="report.html"'
-                self.msg.attach(atta_html)
+            text_html = MIMEText(self.message, 'html', 'utf-8')
+            self.msg.attach(text_html)
 
         # 添加附件，支持多个附件（传入list），或者单个附件（传入str）
         if self.files:
@@ -105,14 +95,3 @@ class Email:
                 smtp_server.quit()  # 断开服务器连接
                 Log.info('发送邮件"{0}"成功! 收件人：{1}。'
                          .format(self.title, self.receiver))
-
-    def _find_new_file(self, dir):
-        """查找目录下最新的文件"""
-        file_lists = os.listdir(dir)
-        file_lists.sort(key=lambda fn: os.path.getmtime(dir + "\\" + fn)
-                        if not os.path.isdir(dir + "\\" + fn)
-                        else 0)
-        # print('最新的文件为： ' + file_lists[-1])
-        file = os.path.join(dir, file_lists[-1])
-        Log.info('最新的测试报告为：'+str(file))
-        return file

@@ -7,7 +7,7 @@ Created on Mon Aug 13 16:53:12 2018
 
 import json
 import requests
-from utils.log import Log
+import Log
 
 
 class MyRequest:
